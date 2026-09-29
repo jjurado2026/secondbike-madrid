@@ -1,11 +1,11 @@
 /* =====================================================================
-   SECONDBIKE — "Carril"
-   Todo el contenido se lee sin JavaScript. Esto añade: la bici que
-   recorre el carril al cargar y la que marca la lectura bajo la cabecera,
-   el estado abierto/cerrado con su horario, el selector de las seis
-   preguntas, el filtro de bicis a la venta, el cuentakilómetros, el
-   "Leer todo", la fachada del mapa, la batería de la bici eléctrica, el
-   menú y la barra fija en móvil.
+   SECONDBIKE — "Carril" (v2)
+   Todo el contenido se lee sin JavaScript. Esto añade: la entrada del
+   hero, la cadena que corre bajo la cabecera, el viaje de los servicios
+   (el scroll vertical mueve la carretera en horizontal, la bici pedalea y
+   cada persiana sube al llegar), el estado abierto/cerrado, el filtro de
+   bicis, el cuentakilómetros, la batería, el desplegable del taller, la
+   fachada del mapa, el menú y la barra fija en móvil.
    ===================================================================== */
 (() => {
   'use strict';
@@ -28,40 +28,9 @@
     Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 700))]).then(() => requestAnimationFrame(arrancar));
   } else arrancar();
 
-  // La bici del hero aparca al final del carril, a la altura del último dato
-  const biciHero = $('.carril-raya__bici');
-  const aparcar = () => {
-    if (!biciHero) return;
-    const pista = biciHero.parentElement.getBoundingClientRect();
-    const env = $('.hero__carril .env');
-    const der = env ? env.getBoundingClientRect().right - parseFloat(getComputedStyle(env).paddingRight) : pista.right - 24;
-    biciHero.style.setProperty('--fin', `${Math.round(der - pista.left - biciHero.getBoundingClientRect().width)}px`);
-  };
-  aparcar();
-  addEventListener('resize', aparcar, { passive: true });
-
-  /* ---------- Cabecera: sombra y la bici que avanza con la lectura ---------- */
   const cab = $('.cab');
-  const biciCab = $('.carril-cab__bici');
-  const logo = $('.cab .logo');
-  const acciones = $('.cab__acciones');
-  let pendiente = false;
-  const alScroll = () => {
-    pendiente = false;
-    if (cab) cab.dataset.scroll = scrollY > 8 ? 'si' : 'no';
-    if (biciCab) {
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-      // Va del logo al botón del teléfono: nunca pisa la marca ni los botones
-      const salida = logo ? logo.getBoundingClientRect().right + 14 : 0;
-      const meta = acciones ? acciones.getBoundingClientRect().left - 14 : biciCab.parentElement.clientWidth;
-      const recorrido = Math.max(0, meta - biciCab.getBoundingClientRect().width - salida);
-      biciCab.style.setProperty('--x', `${(salida + p * recorrido).toFixed(1)}px`);
-    }
-    bateria();
-  };
-  addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(alScroll); } }, { passive: true });
-  addEventListener('resize', alScroll, { passive: true });
+  const cadena = $('.cab .cadena');
+  const altoCab = () => (cab ? cab.getBoundingClientRect().height : 0);
 
   /* ---------- Desplegable "Servicios" ---------- */
   $$('.nav__desp').forEach(desp => {
@@ -130,114 +99,117 @@
   pintarEstado();
   setInterval(pintarEstado, 60000);
 
-  /* ---------- Las seis preguntas ----------
-     Escritorio: una respuesta siempre visible a la derecha; la rueda del
-     logo baja por el carril hasta la pregunta elegida.
-     Móvil: acordeón; se puede cerrar la que está abierta. */
-  const selector = $('[data-selector]');
-  if (selector) {
-    const botones = $$('.selector__pregunta button', selector);
-    const rueda = $('.selector__rueda', selector);
-    const moverRueda = () => {
-      const activo = botones.find(b => b.getAttribute('aria-expanded') === 'true');
-      if (!rueda || !activo || !mqAncho.matches) return;
-      const carril = rueda.parentElement.getBoundingClientRect();
-      const b = activo.getBoundingClientRect();
-      rueda.style.setProperty('--y', `${Math.round(b.top + b.height / 2 - carril.top - rueda.offsetHeight / 2)}px`);
+  /* ---------- Servicios: el viaje por la carretera ----------
+     La sección se alarga; su marco se queda fijo bajo la cabecera y el
+     scroll vertical se convierte en avance horizontal. Cada tramo tiene
+     una parada (la bici llega, la persiana sube) y un avance suave. */
+  const servicios = $('[data-servicios]');
+  let viaje = null;
+  if (servicios && !quieto) {
+    const marco = $('.servicios__marco', servicios);
+    const pista = $('[data-pista-servicios]', servicios);
+    const items = $$('.servicio', servicios);
+    const hitos = $$('.hito', servicios);
+    const bici = $('.ciclista', servicios);
+    const actual = $('[data-actual]', servicios);
+    const N = items.length;
+    const suave = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let paso = 0, maxDesplaza = 0, recorrido = 1;
+
+    servicios.classList.add('servicios--viaje');
+
+    const medir = () => {
+      paso = items[1].offsetLeft - items[0].offsetLeft;
+      maxDesplaza = Math.max(0, pista.scrollWidth - marco.clientWidth);
+      recorrido = Math.max(1, (N - 1) * innerHeight * (mqAncho.matches ? .62 : .55));
+      servicios.style.setProperty('--alto-viaje', `${marco.offsetHeight + recorrido}px`);
     };
-    const abrir = (boton, { animar = true } = {}) => {
-      botones.forEach(b => {
-        const panel = document.getElementById(b.getAttribute('aria-controls'));
-        const es = b === boton;
-        b.setAttribute('aria-expanded', String(es));
-        panel.hidden = !es;
-        panel.classList.remove('entra');
-        if (es && animar && !quieto) { void panel.offsetWidth; panel.classList.add('entra'); }
-      });
-      moverRueda();
+    const pintar = () => {
+      const r = servicios.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (altoCab() - r.top) / recorrido));
+      const f = p * (N - 1);
+      const i = Math.min(N - 2, Math.floor(f));
+      const local = f - i;
+      // Un 30 % de cada tramo parado en el servicio; el resto, avance suave
+      const pos = Math.min(N - 1, i + (local < .3 ? 0 : suave((local - .3) / .7)));
+      const desplaza = pos * paso;
+      const tx = Math.min(desplaza, maxDesplaza);
+      pista.style.setProperty('--tx', `${-tx}px`);
+      bici.style.setProperty('--bx', `${desplaza - tx}px`);
+      bici.style.setProperty('--giro', `${pos * 540}deg`);
+      const activo = Math.min(N - 1, Math.floor(pos + .12));
+      items.forEach((it, k) => it.classList.toggle('abierto', k <= activo));
+      hitos.forEach((h, k) => h.classList.toggle('pasado', k <= activo));
+      if (actual) actual.textContent = activo + 1;
     };
-    const cerrarTodo = () => botones.forEach(b => {
-      b.setAttribute('aria-expanded', 'false');
-      document.getElementById(b.getAttribute('aria-controls')).hidden = true;
-    });
-    botones.forEach((b, i) => {
-      b.addEventListener('click', () => {
-        const yaAbierto = b.getAttribute('aria-expanded') === 'true';
-        if (yaAbierto && !mqAncho.matches) { cerrarTodo(); return; }
-        if (yaAbierto) return;
-        abrir(b);
-        if (!mqAncho.matches) {
-          const top = b.getBoundingClientRect().top;
-          const tapa = cab ? cab.getBoundingClientRect().bottom + 12 : 0;
-          if (top < tapa) scrollTo({ top: scrollY + top - tapa, behavior: quieto ? 'auto' : 'smooth' });
-        }
-      });
-      b.addEventListener('keydown', e => {
-        const mover = { ArrowDown: 1, ArrowUp: -1 }[e.key];
-        if (!mover) return;
-        e.preventDefault();
-        botones[(i + mover + botones.length) % botones.length].focus();
-      });
-    });
-    // Parámetro de revisión: ?pregunta=3
-    const pedida = +new URLSearchParams(location.search).get('pregunta');
-    if (pedida >= 1 && pedida <= botones.length) abrir(botones[pedida - 1], { animar: false });
-    mqAncho.addEventListener('change', e => {
-      if (e.matches && !botones.some(b => b.getAttribute('aria-expanded') === 'true')) abrir(botones[0], { animar: false });
-      moverRueda();
-    });
-    addEventListener('resize', moverRueda, { passive: true });
-    if (document.fonts) document.fonts.ready.then(moverRueda);
-    moverRueda();
+    // Lleva el scroll hasta el servicio k (teclado, enlaces y ?servicio=)
+    const irA = (k, suaveScroll = false) => {
+      const tramo = recorrido / (N - 1);
+      const y = scrollY + servicios.getBoundingClientRect().top - altoCab() + k * tramo + (k < N - 1 ? tramo * .12 : 0);
+      scrollTo({ top: Math.round(y), behavior: suaveScroll ? 'smooth' : 'auto' });
+    };
+    items.forEach((it, k) => it.addEventListener('focusin', () => {
+      if (!it.classList.contains('abierto') || Math.abs(it.getBoundingClientRect().left - items[0].getBoundingClientRect().left) > 2) irA(k);
+    }));
+    viaje = { medir, pintar };
+    medir();
+    pintar();
+    const pedido = +new URLSearchParams(location.search).get('servicio');
+    if (pedido >= 1 && pedido <= N) requestAnimationFrame(() => { irA(pedido - 1); pintar(); });
+    if (document.fonts) document.fonts.ready.then(() => { medir(); pintar(); });
+    addEventListener('load', () => { medir(); pintar(); });
   }
 
-  /* ---------- Bicis a la venta: filtro y flechas ----------
-     Los recuentos son los de su tienda WooCommerce el 29-sep-2026. */
-  const TIENDA = {
-    todas:     { n: 32, nombre: 'bicis',          url: 'https://www.secondbikemadrid.com/shop/' },
-    montana:   { n: 7,  nombre: 'de montaña',     url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-de-montana/' },
-    urbana:    { n: 10, nombre: 'urbanas',        url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-urbanas-de-segunda-mano/' },
-    electrica: { n: 8,  nombre: 'eléctricas',     url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-electrica-segunda-mano-madrid/' },
-    carretera: { n: 6,  nombre: 'de carretera',   url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-de-carretera-de-segunda-mano-en-madrid/' },
-    infantil:  { n: 5,  nombre: 'infantiles',     url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-infantiles/' }
+  /* ---------- Scroll: sombra de cabecera, cadena, viaje y batería ---------- */
+  let pendiente = false;
+  const alScroll = () => {
+    pendiente = false;
+    if (cab) cab.dataset.scroll = scrollY > 8 ? 'si' : 'no';
+    // La cadena corre como si pedalearas: 28,8 px es el paso de un eslabón
+    if (cadena && !quieto) cadena.style.setProperty('--c', `${((scrollY * .6) % 28.8).toFixed(2)}px`);
+    if (viaje) viaje.pintar();
+    bateria();
   };
-  const pista = $('[data-pista]');
-  if (pista) {
-    const bicis = $$('.bici:not(.bici--mas)', pista);
-    const mas = $('[data-mas]', pista);
+  addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(alScroll); } }, { passive: true });
+  addEventListener('resize', () => { if (viaje) viaje.medir(); alScroll(); }, { passive: true });
+
+  /* ---------- Bicis a la venta: filtro ----------
+     Los recuentos son los de su tienda WooCommerce el 29-sep-2026.
+     "Todas" enseña ocho; cada categoría, todas las que hay en el prototipo. */
+  const TIENDA = {
+    todas:     { n: 32, nombre: 'bicis',        url: 'https://www.secondbikemadrid.com/shop/' },
+    montana:   { n: 7,  nombre: 'de montaña',   url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-de-montana/' },
+    urbana:    { n: 10, nombre: 'urbanas',      url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-urbanas-de-segunda-mano/' },
+    electrica: { n: 8,  nombre: 'eléctricas',   url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-electrica-segunda-mano-madrid/' },
+    carretera: { n: 6,  nombre: 'de carretera', url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-de-carretera-de-segunda-mano-en-madrid/' },
+    infantil:  { n: 5,  nombre: 'infantiles',   url: 'https://www.secondbikemadrid.com/categoria-producto/bicicletas-infantiles/' }
+  };
+  const escaparate = $('[data-escaparate]');
+  if (escaparate) {
+    const bicis = $$('.bici', escaparate);
+    const mas = $('[data-mas]');
     const recuento = $('[data-recuento]');
-    const flechas = $$('[data-mover]');
     const filtros = $$('[data-filtro]');
-    const actualizarFlechas = () => {
-      const fin = pista.scrollWidth - pista.clientWidth - 2;
-      flechas.forEach(f => (f.disabled = +f.dataset.mover < 0 ? pista.scrollLeft <= 2 : pista.scrollLeft >= fin));
-    };
-    const filtrar = tipo => {
+    const filtrar = (tipo, animar = true) => {
       filtros.forEach(f => f.setAttribute('aria-pressed', String(f.dataset.filtro === tipo)));
       let i = 0;
       bicis.forEach(b => {
-        const vale = tipo === 'todas' || b.dataset.tipo.split(' ').includes(tipo);
+        const vale = (tipo === 'todas' ? i < 8 : b.dataset.tipo.split(' ').includes(tipo));
         b.hidden = !vale;
         b.classList.remove('entra');
-        if (vale && !quieto) { void b.offsetWidth; b.style.setProperty('--i', i++); b.classList.add('entra'); }
+        if (vale) {
+          if (animar && !quieto) { void b.offsetWidth; b.style.setProperty('--i', i); b.classList.add('entra'); }
+          i++;
+        }
       });
       const t = TIENDA[tipo];
-      const vistas = bicis.filter(b => !b.hidden).length;
       $('[data-mas-num]', mas).textContent = t.n;
       $('[data-mas-tipo]', mas).textContent = t.nombre;
       mas.href = t.url;
-      recuento.textContent = `${vistas} de ${t.n} ${tipo === 'todas' ? 'bicis en stock' : t.nombre + ' en stock'}`;
-      pista.scrollTo({ left: 0, behavior: 'auto' });
-      actualizarFlechas();
+      recuento.textContent = `${i} de ${t.n} ${tipo === 'todas' ? 'bicis en stock' : t.nombre + ' en stock'}`;
     };
     filtros.forEach(f => f.addEventListener('click', () => filtrar(f.dataset.filtro)));
-    flechas.forEach(f => f.addEventListener('click', () => {
-      const paso = ($('.bici:not([hidden])', pista)?.offsetWidth || 300) + 18;
-      pista.scrollBy({ left: +f.dataset.mover * paso * 2, behavior: quieto ? 'auto' : 'smooth' });
-    }));
-    pista.addEventListener('scroll', () => requestAnimationFrame(actualizarFlechas), { passive: true });
-    addEventListener('resize', actualizarFlechas, { passive: true });
-    actualizarFlechas();
+    filtrar('todas', false);
   }
 
   /* ---------- Cuentakilómetros: cada cifra gira hasta su valor, una vez ---------- */
@@ -248,14 +220,13 @@
     let k = 0;
     const html = [...conPunto].map(ch => {
       if (ch === '.') return '<span class="contador__punto">.</span>';
-      const d = +ch;
       const cinta = Array.from({ length: 10 }, (_, n) => `<span>${n}</span>`).join('');
-      return `<span class="rodillo"><span class="rodillo__cinta" style="--d:${d};transition-delay:${(k++) * 90}ms">${cinta}</span></span>`;
+      return `<span class="rodillo"><span class="rodillo__cinta" style="--d:${+ch};transition-delay:${(k++) * 90}ms">${cinta}</span></span>`;
     }).join('');
     c.innerHTML = `<span aria-hidden="true" class="contador__cifras"><span class="contador__signo">+</span>${html}</span>`;
   });
   if (contadores.length) {
-    const lista = $('.cifras__lista');
+    const lista = $('.cifras');
     if (quieto || !('IntersectionObserver' in window)) lista.classList.add('gira');
     else {
       const io = new IntersectionObserver(es => es.forEach(e => {
@@ -265,21 +236,19 @@
     }
   }
 
-  /* ---------- "Leer todo" en los textos largos ---------- */
+  /* ---------- "Más sobre nuestro taller" ---------- */
   $$('[data-leer]').forEach(boton => {
     const bloque = document.getElementById(boton.getAttribute('aria-controls'));
     if (!bloque) return;
-    bloque.classList.add('is-plegado');
-    boton.hidden = false;
+    bloque.hidden = true;
     boton.addEventListener('click', () => {
       const abrir = boton.getAttribute('aria-expanded') !== 'true';
       boton.setAttribute('aria-expanded', String(abrir));
-      bloque.classList.toggle('is-plegado', !abrir);
-      const extra = $$(':scope > p:nth-child(n+3)', bloque);
-      extra.forEach((p, i) => { p.classList.remove('aparece'); if (abrir && !quieto) { p.style.setProperty('--i', i); void p.offsetWidth; p.classList.add('aparece'); } });
-      if (!abrir) {
-        const top = bloque.getBoundingClientRect().top;
-        if (top < 0) scrollTo({ top: scrollY + top - 120, behavior: 'auto' });
+      bloque.hidden = !abrir;
+      bloque.classList.remove('abre');
+      if (abrir && !quieto) {
+        $$('p', bloque).forEach((p, i) => p.style.setProperty('--i', i));
+        void bloque.offsetWidth; bloque.classList.add('abre');
       }
     });
   });
@@ -310,8 +279,8 @@
     if (!carga || !relleno || !mqAncho.matches) return;
     if (quieto) { relleno.style.setProperty('--carga', 1); return; }
     const r = carga.getBoundingClientRect();
-    const p = (innerHeight * .6 - r.top) / (r.height * .8);
-    relleno.style.setProperty('--carga', Math.min(1, Math.max(.08, p)).toFixed(3));
+    const p = (innerHeight * .85 - r.top) / (innerHeight * .55);
+    relleno.style.setProperty('--carga', Math.min(1, Math.max(.04, p)).toFixed(3));
   }
 
   /* ---------- Barra fija y WhatsApp: aparecen cuando el hero sale ---------- */
