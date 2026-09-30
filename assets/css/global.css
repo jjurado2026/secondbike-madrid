@@ -1,10 +1,11 @@
 /* =====================================================================
-   SECONDBIKE — global.css · Dirección "Carril" (v2)
-   Sin líneas discontinuas ni cadena bajo la cabecera. Recursos del taller: la cadena de la bici (solo sobre el pie),
-   (bajo la cabecera, corre al hacer scroll; y sobre el pie) y la
-   persiana metálica que se levanta en cada servicio. La carretera de los
-   servicios es asfalto liso, con la bici del logo pedaleando.
-   Colores: los suyos. Verde de su cabecera, negro de sus botones, blanco.
+   SECONDBIKE — global.css · Dirección "Carril" (v3.2)
+   Cabecera fija en el verde de su menú, siempre del mismo alto y sin
+   efectos al hacer scroll. Sin líneas discontinuas ni cadenas: el único
+   recurso del taller es la carretera de los servicios, por la que baja la
+   rueda del logo.
+   Colores: los suyos. Verde de su menú (#3F9104), su verde activo
+   (#1B7613), negro de sus botones y blanco.
    ===================================================================== */
 
 /* ---------- Fuentes autoalojadas (subconjunto latino, variables) ---------- */
@@ -51,7 +52,7 @@
   --negro:#000000;          /* su primario: botones */
   --blanco:#FFFFFF;
 
-  /* El taller: asfalto del carril y acero de la cadena */
+  /* El taller: asfalto del carril */
   --asfalto:#262825;
   --acero:#A7ACA2;
 
@@ -185,8 +186,6 @@ h1,h2,h3{margin:0;font-family:var(--display);font-style:italic;font-weight:800;f
 
 /* ---------- Cabecera: su verde, texto negro como el "bike" del logo ---------- */
 .cab{position:sticky;top:0;z-index:50;background:var(--verde);color:var(--negro)}
-.cab::after{content:'';position:absolute;inset:auto 0 calc(-1 * var(--cadena-alto) - 18px) 0;height:18px;background:linear-gradient(rgba(30,74,11,.12),rgba(30,74,11,0));opacity:0;transition:opacity var(--t-corto) var(--ease);pointer-events:none}
-.cab[data-scroll="si"]::after{opacity:1}
 .cab__fila{height:var(--cab-alto);display:flex;align-items:center;gap:24px}
 .logo{flex:none;display:block;border-radius:6px}
 .logo img{height:40px;width:auto}
@@ -244,12 +243,6 @@ h1,h2,h3{margin:0;font-family:var(--display);font-style:italic;font-weight:800;f
 }
 @media (min-width:1180px){ .solo-ancho{display:inline} }
 
-/* La cadena: placas de acero y rodillos. Solo queda sobre el pie, fija */
-.cadena{position:relative;height:12px;overflow:hidden;background:var(--verde)}
-.cadena::before{
-  content:'';position:absolute;top:0;bottom:0;left:-48px;right:0;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cg fill='%23484C45'%3E%3Crect x='12' y='2.2' width='20' height='5.6' rx='2.8'/%3E%3Crect x='-12' y='2.2' width='20' height='5.6' rx='2.8'/%3E%3C/g%3E%3Crect x='0' y='1' width='20' height='8' rx='4' fill='%231E201D'/%3E%3Cg fill='%23A7ACA2'%3E%3Ccircle cx='4' cy='5' r='1.9'/%3E%3Ccircle cx='16' cy='5' r='1.9'/%3E%3C/g%3E%3C/svg%3E") 0 50%/28.8px 12px repeat-x;
-}
 /* ---------- Estado abierto / cerrado (se calcula con su horario) ---------- */
 .estado{align-items:center;gap:8px;margin:0;font-size:14px;font-weight:600;line-height:1.3;white-space:nowrap}
 .estado__punto{width:9px;height:9px;border-radius:50%;background:#8C9186;flex:none}
@@ -278,8 +271,6 @@ html.menu-abierto{overflow:hidden}
 
 /* ---------- Pie ---------- */
 .pie{background:var(--verde);color:var(--negro);padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-.cadena--pie{height:16px;background:var(--verde)}
-.cadena--pie::before{left:0;background-size:38.4px 16px;transform:none}
 .pie__rejilla{display:grid;gap:40px;padding-block:56px 40px}
 .pie__marca img{width:190px;margin-bottom:22px}
 .pie__marca p{max-width:46ch;font-size:16px;line-height:1.65}
