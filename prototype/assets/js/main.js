@@ -1,7 +1,7 @@
 /* =====================================================================
    SECONDBIKE — "Carril" (v3)
    Todo el contenido se lee sin JavaScript. Esto añade: la entrada del
-   hero, la cadena que corre bajo la cabecera, los desplegables del menú,
+   hero, los desplegables del menú,
    la carretera de los servicios con la rueda del logo bajando por ella,
    el cuentakilómetros y la rueda que gira en "Un servicio de calidad", el
    carrusel de reseñas, el estado abierto/cerrado, la fachada del mapa, el
@@ -28,7 +28,6 @@
   } else arrancar();
 
   const cab = $('.cab');
-  const cadena = $('.cab .cadena');
 
   /* ---------- Desplegables del menú (Taller, Segunda mano) ---------- */
   const desplegables = $$('.nav__desp');
@@ -212,14 +211,12 @@
     pintarCarrusel();
   }
 
-  /* ---------- Scroll: sombra de cabecera, cadena, carretera y rueda grande ---------- */
+  /* ---------- Scroll: sombra de cabecera, carretera y rueda grande ---------- */
   let pendiente = false;
   const alScroll = () => {
     pendiente = false;
     if (cab) cab.dataset.scroll = scrollY > 8 ? 'si' : 'no';
     if (quieto) return;
-    // La cadena corre como si pedalearas: 28,8 px es el paso de un eslabón
-    if (cadena) cadena.style.setProperty('--c', `${((scrollY * .6) % 28.8).toFixed(2)}px`);
     if (carretera) carretera.colocar();
     if (calidad && ruedaGrande) {
       const r = calidad.getBoundingClientRect();
