@@ -27,7 +27,6 @@
     Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 700))]).then(() => requestAnimationFrame(arrancar));
   } else arrancar();
 
-  const cab = $('.cab');
 
   /* ---------- Desplegables del menú (Taller, Segunda mano) ---------- */
   const desplegables = $$('.nav__desp');
@@ -211,11 +210,10 @@
     pintarCarrusel();
   }
 
-  /* ---------- Scroll: sombra de cabecera, carretera y rueda grande ---------- */
+  /* ---------- Scroll: carretera y rueda grande ---------- */
   let pendiente = false;
   const alScroll = () => {
     pendiente = false;
-    if (cab) cab.dataset.scroll = scrollY > 8 ? 'si' : 'no';
     if (quieto) return;
     if (carretera) carretera.colocar();
     if (calidad && ruedaGrande) {
