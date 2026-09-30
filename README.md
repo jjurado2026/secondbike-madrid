@@ -23,6 +23,9 @@ cd prototype && python3 -m http.server 8000
 ```
 Parámetro útil para revisar: `?ss` (sin animaciones, para capturas).
 
+## Caducidad del prototipo
+La home es visible **10 días**: del 30-sep al 9-oct-2026 (hora de Madrid). Desde el **sábado 10-oct-2026 a las 00:00**, `index.html` envía a `caducada.html`: el mensaje de Juan y una miniatura de la home entera. Para enseñarla después, añadir `?acceso=jj` a la dirección. La fecha está en el primer `<script>` de `index.html`.
+
 ## Publicar
 ```bash
 git subtree push --prefix=prototype origin gh-pages
