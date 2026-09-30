@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propuesta caducada | Secondbike</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F2F5EE">
+<link rel="preload" href="assets/fonts/saira-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='15' fill='%233F9104'/><circle cx='16' cy='16' r='12.2' fill='white'/><g fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><circle cx='12.6' cy='19.2' r='4.6'/><circle cx='21.2' cy='21.4' r='2.6'/><path d='M10.4 12.1 10.9 10.5H15.1L12.6 19.2M14.4 13.1H18.6L21.2 21.4M18.2 11.4c1-.3 2.1.2 3.2-.2'/></g></svg>">
+<style>
+  /* Página de caducidad de la propuesta: el mensaje de Juan y la home entera en miniatura */
+  @font-face{font-family:'Saira';src:url('assets/fonts/saira-italic.woff2') format('woff2');font-style:italic;font-weight:100 900;font-stretch:50% 125%;font-display:swap}
+  @font-face{font-family:'Red Hat Text';src:url('assets/fonts/red-hat-text.woff2') format('woff2');font-style:normal;font-weight:300 700;font-display:swap}
+  :root{--verde:#3F9104;--verde-texto:#2E6B04;--tinte:#F2F5EE;--linea:#D6DCCF;--tinta:#1C1E1A;--texto:#30332E;--suave:#5B6056;--ease:cubic-bezier(.16,1,.3,1)}
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--tinte);color:var(--texto);font-family:'Red Hat Text',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:var(--verde-texto);font-weight:650;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.2em;overflow-wrap:anywhere}
+  a:hover{color:var(--tinta)}
+  a:focus-visible{outline:3px solid var(--tinta);outline-offset:3px;border-radius:3px}
+  .pagina{min-height:100%;display:flex;flex-direction:column;padding:28px clamp(16px,5vw,64px)}
+  .firma{margin:0;font-weight:700;font-size:18px;color:var(--tinta);letter-spacing:.01em}
+  .firma span{color:var(--verde)}
+  .cuerpo{flex:1;display:grid;align-items:center;gap:48px;width:100%;max-width:1080px;margin:0 auto;padding-block:40px}
+  h1{margin:0;max-width:20ch;font-family:'Saira','Arial Narrow',sans-serif;font-style:italic;font-weight:820;font-stretch:108%;font-size:clamp(30px,4.2vw,50px);line-height:1.08;color:var(--tinta);text-wrap:balance}
+  .mensaje p{margin:22px 0 0;max-width:40ch;font-size:clamp(18px,1.6vw,21px)}
+  .mensaje .nota{margin-top:28px;font-size:15px;color:var(--suave)}
+
+  /* La home entera, en una ventana pequeña que se desplaza sola */
+  .ventana{justify-self:center;width:min(260px,70vw);border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(30,74,11,.08),0 26px 50px -24px rgba(30,74,11,.45);overflow:hidden}
+  .ventana__barra{display:flex;gap:6px;padding:10px 12px;background:#E6EBDF}
+  .ventana__barra i{width:9px;height:9px;border-radius:50%;background:#C3CBB9}
+  .ventana__pantalla{position:relative;height:clamp(300px,52vh,420px);overflow:hidden}
+  .ventana__pantalla img{display:block;width:100%;height:auto;animation:recorre 26s ease-in-out 1.2s infinite alternate}
+  @keyframes recorre{from{transform:translateY(0)}to{transform:translateY(calc(-100% + clamp(300px,52vh,420px)))}}
+  .ventana figcaption{padding:10px 14px 12px;font-size:13px;line-height:1.4;color:var(--suave);border-top:1px solid var(--linea)}
+  @media (min-width:860px){ .cuerpo{grid-template-columns:minmax(0,1fr) auto;gap:72px} }
+  @media (prefers-reduced-motion:reduce){ .ventana__pantalla img{animation:none} }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <p class="firma">jjurado<span>.</span></p>
+  <main class="cuerpo">
+    <div class="mensaje">
+      <h1>No puedes ver esta página porque han pasado más de 10 días desde su envío.</h1>
+      <p>Si sigues con interés, escríbeme a <a href="mailto:jjuradogarciadelrio@gmail.com?subject=Propuesta%20web%20Secondbike">jjuradogarciadelrio@gmail.com</a>.</p>
+      <p class="nota">Propuesta de nueva home para Secondbike, enviada el 30 de septiembre de 2026.</p>
+    </div>
+    <figure class="ventana">
+      <div class="ventana__barra" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="ventana__pantalla">
+        <picture>
+          <source type="image/avif" srcset="assets/img/home-completa-480.avif">
+          <img src="assets/img/home-completa-480.webp" width="480" height="3182" alt="Miniatura de la nueva home de Secondbike completa, de la cabecera al pie">
+        </picture>
+      </div>
+      <figcaption>La nueva home, de arriba abajo</figcaption>
+    </figure>
+  </main>
+</div>
+</body>
+</html>
