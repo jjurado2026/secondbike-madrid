@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <script>
-/* Propuesta visible 10 días: del 30-sep al 9-oct-2026 (hora de Madrid).
-   Desde el sábado 10-oct-2026 a las 00:00 (22:00 UTC del 9-oct) se envía a la página de caducidad.
+/* Propuesta visible 10 días desde su envío, el 1-oct-2026 (el día de envío cuenta): hasta el 10-oct-2026 a las 23:59 de Madrid.
+   Desde el domingo 11-oct-2026 a las 00:00 (22:00 UTC del 10-oct) se envía a la página de caducidad.
    Para enseñarla después, añadir ?acceso=jj a la dirección. */
-(function(){if(Date.now()>=Date.UTC(2026,9,9,22)&&!/[?&]acceso=jj\b/.test(location.search))location.replace('caducada.html')})();
+(function(){if(Date.now()>=Date.UTC(2026,9,10,22)&&!/[?&]acceso=jj\b/.test(location.search))location.replace('caducada.html')})();
 document.documentElement.classList.add('js');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
